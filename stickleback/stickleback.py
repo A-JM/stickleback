@@ -12,7 +12,7 @@ from sktime.classification.compose import TimeSeriesForestClassifier, ColumnEnse
 from sktime.utils.data_processing import from_3d_numpy_to_nested
 from typing import Dict, Tuple, Union
 
-from ipdb import set_trace
+# from ipdb import set_trace
 
 # Utility functions
 def _diff_from(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
@@ -71,7 +71,7 @@ class Stickleback:
         self.local_data = pd.DataFrame()
         self.local_labels = []
         self.clf_local = ColumnEnsembleClassifier(
-            estimators=[("TSF_" + c, TimeSeriesForestClassifier(n_estimators=100, class_weight="balanced"), [i]) 
+            estimators=[("TSF_" + c, TimeSeriesForestClassifier(n_estimators=10, class_weight="balanced"), [i]) 
                         for i, c in enumerate(next(iter(sensors.values())).columns)]
         )
         self.global_data = pd.DataFrame()
@@ -266,9 +266,12 @@ class Stickleback:
 
         Adds data to training dataset and re-fits classifer.
         """
+        print(len(self.local_data), len(self.local_labels))
         self.local_data = self.local_data.append(self._extract_nested(false_positives))
         n_fps = reduce(lambda a, b: len(a) + len(b), false_positives.values())
-        self.local_labels += [Stickleback.nonevent] * n_fps
+        self.local_labels += [Stickleback.nonevent] * len(n_fps)
+        print(len(self._extract_nested(false_positives)), len(n_fps))
+        print(len(self.local_data), len(self.local_labels))
         self.fit_local()
         self.fit_global(nth, tol)
 
@@ -422,3 +425,6 @@ class Stickleback:
                 axs[i].invert_yaxis()
             
         return fig
+
+
+
